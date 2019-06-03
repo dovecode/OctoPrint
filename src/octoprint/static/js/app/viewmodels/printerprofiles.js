@@ -19,7 +19,8 @@ $(function() {
                 x: {speed: 6000, inverted: false},
                 y: {speed: 6000, inverted: false},
                 z: {speed: 200, inverted: false},
-                e: {speed: 300, inverted: false}
+                e: {speed: 300, inverted: false},
+                speedUnitDisplayFactor: 1
             },
             extruder: {
                 count: 1,
@@ -67,6 +68,40 @@ $(function() {
         self.extruders = ko.observable();
         self.extruderOffsets = ko.observableArray();
         self.sharedNozzle = ko.observable();
+
+        // list of options for the speed unit. 'factor' is the ratio of unit to mm/min.
+        // i.e. how much to multiply a value in that unit by to convert it to mm/min
+        self.axisSpeedUnitOptions = ko.observable([
+            {factor: "1", name: gettext("mm/min")},
+            {factor: "60", name: gettext("mm/s")},
+        ]);
+
+        // currently selected speed unit factor ('factor' from axisSpeedUnitOptions)
+        self.axisSpeedUnitFactor = ko.observable();
+
+        // currently selected speed unit name ('name' from axisSpeedUnitOptions)
+        self.axisSpeedUnit = ko.observable();
+
+        self.axisSpeedUnitFactor.subscribe(function(newValue) {
+            var oldValue = self.axisSpeedUnitFactor_old;
+
+            // figure out the name of the newly selected option and set the
+            // text label next to each value to this name
+            self.axisSpeedUnitOptions().forEach(function(option){
+                if (option.factor == newValue) {
+                    self.axisSpeedUnit(option.name);
+                }
+            });
+
+            // convert all axis speeds from old to new unit
+            self.axisXSpeed((self.axisXSpeed() / newValue) * oldValue);
+            self.axisYSpeed((self.axisYSpeed() / newValue) * oldValue);
+            self.axisZSpeed((self.axisZSpeed() / newValue) * oldValue);
+            self.axisESpeed((self.axisESpeed() / newValue) * oldValue);
+
+            // save current value as old value, since Knockout doesn't yet support this in the subscription
+            self.axisSpeedUnitFactor_old = newValue;
+        });
 
         self.axisXSpeed = ko.observable();
         self.axisYSpeed = ko.observable();
@@ -228,14 +263,23 @@ $(function() {
             }
             self.extruderOffsets(offsets);
 
-            self.axisXSpeed(data.axes.x.speed);
+            // fetch the speed unit factor (i.e. the ratio between the unit stored in the profile (mm/min)
+            // and the unit in which it is being displayed. Default factor is "1", i.e. display unit is
+            // mm/min. If mm/s is displayed, this is changed to "60".
+            self.axisSpeedUnitFactor(data.axes.speedUnitDisplayFactor || 1);
+            self.axisSpeedUnitFactor_old = self.axisSpeedUnitFactor();
+
+            // we will store the self.axis?Speed in the unit used in the UI and only convert when
+            // storing in mm/min
+            self.axisXSpeed(data.axes.x.speed/self.axisSpeedUnitFactor());
             self.axisXInverted(data.axes.x.inverted);
-            self.axisYSpeed(data.axes.y.speed);
+            self.axisYSpeed(data.axes.y.speed/self.axisSpeedUnitFactor());
             self.axisYInverted(data.axes.y.inverted);
-            self.axisZSpeed(data.axes.z.speed);
+            self.axisZSpeed(data.axes.z.speed/self.axisSpeedUnitFactor());
             self.axisZInverted(data.axes.z.inverted);
-            self.axisESpeed(data.axes.e.speed);
+            self.axisESpeed(data.axes.e.speed/self.axisSpeedUnitFactor());
             self.axisEInverted(data.axes.e.inverted);
+
         };
 
         self.toProfileData = function() {
@@ -282,22 +326,24 @@ $(function() {
                     sharedNozzle: self.sharedNozzle()
                 },
                 axes: {
+                    // we need to scale all speeds by self.axisSpeedUnitFactor (the ratio between stored and displayed units)
                     x: {
-                        speed: validInt(self.axisXSpeed(), defaultProfile.axes.x.speed),
+                        speed: validInt(self.axisXSpeed(), defaultProfile.axes.x.speed) * self.axisSpeedUnitFactor(),
                         inverted: self.axisXInverted()
                     },
                     y: {
-                        speed: validInt(self.axisYSpeed(), defaultProfile.axes.y.speed),
+                        speed: validInt(self.axisYSpeed(), defaultProfile.axes.y.speed) * self.axisSpeedUnitFactor(),
                         inverted: self.axisYInverted()
                     },
                     z: {
-                        speed: validInt(self.axisZSpeed(), defaultProfile.axes.z.speed),
+                        speed: validInt(self.axisZSpeed(), defaultProfile.axes.z.speed) * self.axisSpeedUnitFactor(),
                         inverted: self.axisZInverted()
                     },
                     e: {
-                        speed: validInt(self.axisESpeed(), defaultProfile.axes.e.speed),
+                        speed: validInt(self.axisESpeed(), defaultProfile.axes.e.speed) * self.axisSpeedUnitFactor(),
                         inverted: self.axisEInverted()
-                    }
+                    },
+                    speedUnitDisplayFactor: self.axisSpeedUnitFactor()
                 }
             };
 

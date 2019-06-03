@@ -9,7 +9,7 @@
         <div class="controls form-inline">
             <div class="input-append">
                 <input type="number" class="input-mini text-right" data-bind="value: axisXSpeed" placeholder="6000">
-                <span class="add-on">mm/min</span>
+                <span class="add-on" data-bind="text: axisSpeedUnit"></span>
             </div>
             <label class="checkbox">
                 <input type="checkbox" data-bind="checked: axisXInverted"> {{ _('Invert control') }}
@@ -21,7 +21,7 @@
         <div class="controls form-inline">
             <div class="input-append">
                 <input type="number" class="input-mini text-right" data-bind="value: axisYSpeed" placeholder="6000">
-                <span class="add-on">mm/min</span>
+                <span class="add-on" data-bind="text: axisSpeedUnit"></span>
             </div>
             <label class="checkbox">
                 <input type="checkbox" data-bind="checked: axisYInverted"> {{ _('Invert control') }}
@@ -33,7 +33,7 @@
         <div class="controls form-inline">
             <div class="input-append">
                 <input type="number" class="input-mini text-right" data-bind="value: axisZSpeed" placeholder="200">
-                <span class="add-on">mm/min</span>
+                <span class="add-on" data-bind="text: axisSpeedUnit"></span>
             </div>
             <label class="checkbox">
                 <input type="checkbox" data-bind="checked: axisZInverted"> {{ _('Invert control') }}
@@ -45,8 +45,20 @@
         <div class="controls form-inline">
             <div class="input-append">
                 <input type="number" class="input-mini text-right" data-bind="value: axisESpeed" placeholder="300">
-                <span class="add-on">mm/min</span>
+                <span class="add-on" data-bind="text: axisSpeedUnit"></span>
             </div>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label" for="settings-printerProfileAxisUnit">{{ _('Axis Unit') }}</label>
+        <div class="controls">
+            <select id="settings-printerProfileAxisUnit" data-bind="options: axisSpeedUnitOptions, 
+                                                                    optionsText: 'name',
+                                                                    optionsValue: 'factor',
+                                                                    value: axisSpeedUnitFactor">
+            </select>
+            <span class="help-inline">{{ _('This setting only affects the unit for the input values in this dialog. The commands used to control the axes use mm/min as per the gcode standard.') }}</span>
         </div>
     </div>
 

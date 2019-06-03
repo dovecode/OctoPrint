@@ -94,7 +94,7 @@ A printer profile is a ``dict`` of the following structure:
      - Information about the printer's X axis
    * - ``axes.x.speed``
      - ``float``
-     - Speed of the X axis in mm/s
+     - Speed of the X axis in mm/min
    * - ``axes.x.inverted``
      - ``bool``
      - Whether a positive value change moves the nozzle away from the print bed's origin (False, default) or towards it (True)
@@ -103,7 +103,7 @@ A printer profile is a ``dict`` of the following structure:
      - Information about the printer's Y axis
    * - ``axes.y.speed``
      - ``float``
-     - Speed of the Y axis in mm/s
+     - Speed of the Y axis in mm/min
    * - ``axes.y.inverted``
      - ``bool``
      - Whether a positive value change moves the nozzle away from the print bed's origin (False, default) or towards it (True)
@@ -112,7 +112,7 @@ A printer profile is a ``dict`` of the following structure:
      - Information about the printer's Z axis
    * - ``axes.z.speed``
      - ``float``
-     - Speed of the Z axis in mm/s
+     - Speed of the Z axis in mm/min
    * - ``axes.z.inverted``
      - ``bool``
      - Whether a positive value change moves the nozzle away from the print bed (False, default) or towards it (True)
@@ -121,10 +121,13 @@ A printer profile is a ``dict`` of the following structure:
      - Information about the printer's E axis
    * - ``axes.e.speed``
      - ``float``
-     - Speed of the E axis in mm/s
+     - Speed of the E axis in mm/min
    * - ``axes.e.inverted``
      - ``bool``
      - Whether a positive value change extrudes (False, default) or retracts (True) filament
+   * - ``axes.speedUnitDisplayFactor``
+     - ``int``
+     - The ratio of the values for the axis speeds to mm/min, i.e. what to divide the axes.*.speed values by before displaying them
 
 .. autoclass:: PrinterProfileManager
    :members:
@@ -235,7 +238,8 @@ class PrinterProfileManager(object):
 			x = dict(speed=6000, inverted=False),
 			y = dict(speed=6000, inverted=False),
 			z = dict(speed=200, inverted=False),
-			e = dict(speed=300, inverted=False)
+			e = dict(speed=300, inverted=False),
+			speedUnitDisplayFactor = "1"
 		)
 	)
 
